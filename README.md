@@ -53,16 +53,16 @@ ansible-playbook playbook.yml
 ```
 
 Playbook will:
-✅ Install PHP 8.3 and necessary extensions
-✅ Install Composer
-✅ Install Node.js 20.x & npm
-✅ Install and configure Nginx
-✅ Create Laravel project
-✅ Install Inertia.js and React
-✅ Configure SQLite database
-✅ Compile frontend assets
-✅ Run migrations
-✅ Configure permissions and environment variables
+- ✅ Install PHP 8.3 and necessary extensions
+- ✅ Install Composer
+- ✅ Install Node.js 20.x & npm
+- ✅ Install and configure Nginx
+- ✅ Create Laravel project
+- ✅ Install Inertia.js and React
+- ✅ Configure SQLite database
+- ✅ Compile frontend assets
+- ✅ Run migrations
+- ✅ Configure permissions and environment variables
 
 ## Accessing the Application
 
