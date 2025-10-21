@@ -1,74 +1,74 @@
-# Laravel Deploy com Infrastructure as Code (IaC)
+# Laravel Deployment with Infrastructure as Code (IaC)
 
-Uma aplicação Laravel 12 com Inertia.js e React, deployada automaticamente na AWS EC2 usando Terraform e Ansible. Este projeto serve como introdução prática ao deploy automatizado com ferramentas de Infrastructure as Code.
+A Laravel 12 application with Inertia.js and React, automatically deployed to AWS EC2 using Terraform and Ansible. This project serves as a practical introduction to automated deployment with Infrastructure as Code tools.
 
-## Sobre o Projeto
+## About the Project
 
-Este repositório demonstra como automatizar o deploy de uma aplicação Laravel moderna utilizando:
+This repository demonstrates how to automate the deployment of a modern Laravel application using:
 
-- **Laravel 12** - Framework PHP com arquitetura moderna
-- **Inertia.js + React** - Stack frontend integrada ao Laravel
-- **SQLite** - Banco de dados leve e prático
-- **AWS EC2 (Free Tier)** - Instância t3.micro para hospedagem
-- **Terraform** - Provisionamento de infraestrutura
-- **Ansible** - Configuração e deploy automatizado
+- **Laravel 12** - PHP framework 
+- **Inertia.js + React** - Frontend stack integrated with Laravel
+- **SQLite** - Lightweight and practical database
+- **AWS EC2 (Free Tier)** - t3.micro instance for hosting
+- **Terraform** - Infrastructure provisioning
+- **Ansible** - Automated configuration and deployment
 
-## Pré-requisitos
+## Prerequisites
 
-- Conta AWS ativa
-- AWS Access Key criada (IAM Security Credentials)
-- Par de chaves SSH criado para acessar o EC2 (formato .pem)
-- Security Group da instância EC2 configurado para permitir tráfego de entrada e saída
-- [AWS CLI](https://aws.amazon.com/cli/) instalado e configurado
-- [Terraform](https://www.terraform.io/downloads) instalado
-- [Ansible](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html) instalado
+- Active AWS account
+- AWS Access Key created (IAM Security Credentials)
+- SSH key pair created to access EC2 (.pem format)
+- EC2 instance Security Group configured to allow inbound and outbound traffic
+- [AWS CLI](https://aws.amazon.com/cli/) installed and configured
+- [Terraform](https://www.terraform.io/downloads) installed
+- [Ansible](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html) installed
 
-## Provisionando a Infraestrutura
+## Provisioning Infrastructure
 
 ### Terraform
 
-O Terraform criará a instância EC2 automaticamente.
+Terraform will automatically create the EC2 instance.
 
 ```bash
-# Inicializa o Terraform e baixa os providers necessários
+# Initialize Terraform and download the necessary providers
 terraform init
 
-# Mostra o plano de execução (preview das mudanças)
+# Show the execution plan (preview of changes)
 terraform plan
 
-# Aplica as mudanças e cria a infraestrutura
+# Apply the changes and create the infrastructure
 terraform apply
 ```
-### Configurar Inventário do Ansible
+### Configure Ansible Inventory
 
-Informe o IP público da sua instância EC2 no arquivo `hosts.yml` 
+Enter the public IP of your EC2 instance in the `hosts.yml` file
 
 ### Ansible
 
-O Ansible configurará todo o ambiente e instalará a aplicação:
+Ansible will configure the entire environment and install the application:
 
 ```bash
-# Executa o playbook de configuração e deploy
+# Run the configuration and deploy playbook
 ansible-playbook playbook.yml
 ```
 
-O playbook irá:
-- ✅ Instalar PHP 8.3 e extensões necessárias
-- ✅ Instalar Composer
-- ✅ Instalar Node.js 20.x e npm
-- ✅ Instalar e configurar Nginx
-- ✅ Criar projeto Laravel 12
-- ✅ Instalar Inertia.js e React
-- ✅ Configurar banco de dados SQLite
-- ✅ Compilar assets frontend
-- ✅ Executar migrations
-- ✅ Configurar permissões e variáveis de ambiente
+Playbook will:
+✅ Install PHP 8.3 and necessary extensions
+✅ Install Composer
+✅ Install Node.js 20.x & npm
+✅ Install and configure Nginx
+✅ Create Laravel project
+✅ Install Inertia.js and React
+✅ Configure SQLite database
+✅ Compile frontend assets
+✅ Run migrations
+✅ Configure permissions and environment variables
 
-## Acessando a Aplicação
+## Accessing the Application
 
-Após o deploy, acesse:
+After deployment, access:
 
 ```
-http://IP_PUBLICO_DO_EC2
+http://EC2_PUBLIC_IP
 ```
 
