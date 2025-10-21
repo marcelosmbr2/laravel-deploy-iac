@@ -72,3 +72,4 @@ After deployment, access:
 http://EC2_PUBLIC_IP
 ```
 
+<img width="1673" height="996" alt="image" src="https://github.com/user-attachments/assets/433d18d3-316c-42ca-86d6-389d6f2536c6" />
