@@ -9,7 +9,7 @@ This repository demonstrates how to automate the deployment of a modern Laravel 
 - **Laravel 12** - PHP framework 
 - **Inertia.js + React** - Frontend stack integrated with Laravel
 - **SQLite** - Lightweight and practical database
-- **AWS EC2 (Free Tier)** - t3.micro instance for hosting
+- **AWS EC2 (Free Tier)** - t3.micro instance for hosting - region: us-east-2
 - **Terraform** - Infrastructure provisioning
 - **Ansible** - Automated configuration and deployment
 
