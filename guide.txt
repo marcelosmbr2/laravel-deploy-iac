@@ -1,0 +1,22 @@
+AWS CLI
+
+- Instalar CLI
+- Rodar aws configure (será requisitado a chave secreta)
+- Criar a key em "Criar chave de acesso" (https://us-east-1.console.aws.amazon.com/iam/home?region=us-east-1#/security_credentials)
+
+- Definir permissões nos grupos de segurança (todo o trafego para Ipv4 e Ipv6 pra saída e entrada)
+- Criar par de chaves pra acessar o Ec2
+- Guardar a chave .pem no codebase e adicionar o arquivo ao .gitignore
+- A partir dessa pasta rodar o comando chmod 400 Laravel-IaC.pem e depois o de SSH pra conectar no Ec2
+
+Terraform
+
+- terraform init - Inicializa o projeto e baixa os providers necessários
+- terraform plan - Mostra quais mudanças o Terraform fará na infraestrutura sem aplicá-las.
+- terraform apply - Executa o plano e aplica as mudanças na infraestrutura de fato.
+
+Ansible
+
+- ansible.cfg - Configura o ansible 
+- hosts.yml - Configura o IP das máquinas
+- ansible-playbook playbook.yml - Comando para rodar o ansible

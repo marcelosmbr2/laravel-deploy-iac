@@ -1,0 +1,259 @@
+---
+- hosts: terraform-ansible
+  tasks:
+    # Instalando PHP 8.3 e extensões necessárias
+    - name: Instalando PHP 8.3 e extensões
+      apt:
+        pkg:
+          - php8.3
+          - php8.3-cli
+          - php8.3-fpm
+          - php8.3-mysql
+          - php8.3-pgsql
+          - php8.3-sqlite3
+          - php8.3-curl
+          - php8.3-gd
+          - php8.3-mbstring
+          - php8.3-xml
+          - php8.3-zip
+          - php8.3-bcmath
+          - php8.3-intl
+          - php8.3-redis
+          - unzip
+          - curl
+        update_cache: yes
+      become: yes
+
+    # Instalando Composer
+    - name: Baixando Composer
+      get_url:
+        url: https://getcomposer.org/installer
+        dest: /tmp/composer-setup.php
+      become: yes
+
+    - name: Instalando Composer globalmente
+      command: php /tmp/composer-setup.php --install-dir=/usr/local/bin --filename=composer
+      become: yes
+
+    # Instalando Node.js 20.x e npm
+    - name: Adicionando repositório NodeSource
+      shell: curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+      become: yes
+
+    - name: Instalando Node.js e npm
+      apt:
+        pkg:
+          - nodejs
+        update_cache: yes
+      become: yes
+
+    # Instalando Nginx
+    - name: Instalando Nginx
+      apt:
+        pkg:
+          - nginx
+        update_cache: yes
+      become: yes
+
+    # Criando estrutura de diretórios para o projeto
+    - name: Criando diretório do projeto Laravel
+      file:
+        path: /var/www/laravel
+        state: directory
+        owner: ubuntu
+        group: www-data
+        mode: '0775'
+      become: yes
+
+    # Instalando Laravel 12 via Composer
+    - name: Criando projeto Laravel 12
+      command: composer create-project --prefer-dist laravel/laravel /var/www/laravel "^12.0"
+      args:
+        creates: /var/www/laravel/composer.json
+      become: yes
+      become_user: ubuntu
+
+    # Instalando dependências do Laravel com Inertia.js
+    - name: Instalando Inertia.js (server-side)
+      command: composer require inertiajs/inertia-laravel
+      args:
+        chdir: /var/www/laravel
+      become: yes
+      become_user: ubuntu
+
+    # Instalando dependências Node.js para Inertia.js e React
+    - name: Instalando Inertia.js e React (client-side)
+      command: npm install @inertiajs/react react react-dom
+      args:
+        chdir: /var/www/laravel
+      become: yes
+      become_user: ubuntu
+
+    # Instalando Vite e dependências de desenvolvimento
+    - name: Instalando dependências de desenvolvimento
+      command: npm install -D @vitejs/plugin-react
+      args:
+        chdir: /var/www/laravel
+      become: yes
+      become_user: ubuntu
+
+    # Publicando assets do Inertia
+    - name: Publicando middleware do Inertia
+      command: php artisan inertia:middleware
+      args:
+        chdir: /var/www/laravel
+      become: yes
+      become_user: ubuntu
+
+    # Configurando permissões
+    - name: Configurando permissões do storage
+      file:
+        path: /var/www/laravel/storage
+        state: directory
+        owner: ubuntu
+        group: www-data
+        mode: '0775'
+        recurse: yes
+      become: yes
+
+    - name: Configurando permissões do bootstrap/cache
+      file:
+        path: /var/www/laravel/bootstrap/cache
+        state: directory
+        owner: ubuntu
+        group: www-data
+        mode: '0775'
+        recurse: yes
+      become: yes
+
+    # Configurando Nginx para Laravel
+    - name: Criando configuração Nginx para Laravel
+      copy:
+        dest: /etc/nginx/sites-available/laravel
+        content: |
+          server {
+              listen 80;
+              listen [::]:80;
+              server_name {{ ansible_default_ipv4.address }};
+              root /var/www/laravel/public;
+
+              add_header X-Frame-Options "SAMEORIGIN";
+              add_header X-Content-Type-Options "nosniff";
+
+              index index.php;
+
+              charset utf-8;
+
+              location / {
+                  try_files $uri $uri/ /index.php?$query_string;
+              }
+
+              location = /favicon.ico { access_log off; log_not_found off; }
+              location = /robots.txt  { access_log off; log_not_found off; }
+
+              error_page 404 /index.php;
+
+              location ~ \.php$ {
+                  fastcgi_pass unix:/var/run/php/php8.3-fpm.sock;
+                  fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
+                  include fastcgi_params;
+              }
+
+              location ~ /\.(?!well-known).* {
+                  deny all;
+              }
+          }
+      become: yes
+
+    - name: Habilitando site Laravel no Nginx
+      file:
+        src: /etc/nginx/sites-available/laravel
+        dest: /etc/nginx/sites-enabled/laravel
+        state: link
+      become: yes
+
+    - name: Removendo configuração padrão do Nginx
+      file:
+        path: /etc/nginx/sites-enabled/default
+        state: absent
+      become: yes
+
+    - name: Reiniciando Nginx
+      service:
+        name: nginx
+        state: restarted
+        enabled: yes
+      become: yes
+
+    # Build do frontend
+    - name: Build dos assets com Vite
+      command: npm run build
+      args:
+        chdir: /var/www/laravel
+      become: yes
+      become_user: ubuntu
+
+    # Configurando arquivo .env
+    - name: Copiando .env.example para .env
+      copy:
+        src: /var/www/laravel/.env.example
+        dest: /var/www/laravel/.env
+        remote_src: yes
+        owner: ubuntu
+        group: www-data
+        mode: '0644'
+      become: yes
+
+    - name: Configurando variáveis do .env
+      lineinfile:
+        path: /var/www/laravel/.env
+        regexp: "{{ item.regexp }}"
+        line: "{{ item.line }}"
+      loop:
+        - { regexp: '^APP_NAME=', line: 'APP_NAME="Laravel-IaC"' }
+        - { regexp: '^APP_ENV=', line: 'APP_ENV=production' }
+        - { regexp: '^APP_DEBUG=', line: 'APP_DEBUG=false' }
+        - { regexp: '^APP_URL=', line: 'APP_URL=http://{{ ansible_default_ipv4.address }}' }
+        - { regexp: '^DB_CONNECTION=', line: 'DB_CONNECTION=sqlite' }
+        - { regexp: '^SESSION_DRIVER=', line: 'SESSION_DRIVER=file' }
+        - { regexp: '^CACHE_DRIVER=', line: 'CACHE_DRIVER=file' }
+        - { regexp: '^QUEUE_CONNECTION=', line: 'QUEUE_CONNECTION=sync' }
+      become: yes
+
+    - name: Removendo linhas desnecessárias do MySQL do .env
+      lineinfile:
+        path: /var/www/laravel/.env
+        regexp: "{{ item }}"
+        state: absent
+      loop:
+        - '^DB_HOST='
+        - '^DB_PORT='
+        - '^DB_DATABASE='
+        - '^DB_USERNAME='
+        - '^DB_PASSWORD='
+      become: yes
+
+    - name: Criando arquivo de banco de dados SQLite
+      file:
+        path: /var/www/laravel/database/database.sqlite
+        state: touch
+        owner: ubuntu
+        group: www-data
+        mode: '0664'
+      become: yes
+
+    # Gerando APP_KEY
+    - name: Gerando APP_KEY do Laravel
+      command: php artisan key:generate
+      args:
+        chdir: /var/www/laravel
+      become: yes
+      become_user: ubuntu
+
+    # Executando migrations
+    - name: Executando migrations do banco de dados
+      command: php artisan migrate --force
+      args:
+        chdir: /var/www/laravel
+      become: yes
+      become_user: ubuntu
