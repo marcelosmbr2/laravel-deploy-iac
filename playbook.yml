@@ -55,51 +55,35 @@
         update_cache: yes
       become: yes
 
-    # Criando estrutura de diretórios para o projeto
-    - name: Criando diretório do projeto Laravel
-      file:
-        path: /var/www/laravel
-        state: directory
-        owner: ubuntu
-        group: www-data
-        mode: '0775'
+    # Instalando Git
+    - name: Instalando Git
+      apt:
+        pkg:
+          - git
+        update_cache: yes
       become: yes
 
-    # Instalando Laravel 12 via Composer
-    - name: Criando projeto Laravel 12
-      command: composer create-project --prefer-dist laravel/laravel /var/www/laravel "^12.0"
-      args:
-        creates: /var/www/laravel/composer.json
-      become: yes
-      become_user: ubuntu
-
-    # Instalando dependências do Laravel com Inertia.js
-    - name: Instalando Inertia.js (server-side)
-      command: composer require inertiajs/inertia-laravel
-      args:
-        chdir: /var/www/laravel
+    # Clonando aplicação do repositório
+    - name: Clonando aplicação Laravel do GitHub
+      git:
+        repo: 'https://github.com/marcelosmbr2/laravel-deploy-iac.git'
+        dest: /var/www/laravel
+        version: main
+        force: yes
       become: yes
       become_user: ubuntu
 
-    # Instalando dependências Node.js para Inertia.js e React
-    - name: Instalando Inertia.js e React (client-side)
-      command: npm install @inertiajs/react react react-dom
+    # Instalando dependências do Composer
+    - name: Instalando dependências do Composer
+      command: composer install --no-dev --optimize-autoloader
       args:
         chdir: /var/www/laravel
       become: yes
       become_user: ubuntu
 
-    # Instalando Vite e dependências de desenvolvimento
-    - name: Instalando dependências de desenvolvimento
-      command: npm install -D @vitejs/plugin-react
-      args:
-        chdir: /var/www/laravel
-      become: yes
-      become_user: ubuntu
-
-    # Publicando assets do Inertia
-    - name: Publicando middleware do Inertia
-      command: php artisan inertia:middleware
+    # Instalando dependências Node.js
+    - name: Instalando dependências do NPM
+      command: npm ci --production
       args:
         chdir: /var/www/laravel
       become: yes
