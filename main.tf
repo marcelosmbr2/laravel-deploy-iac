@@ -22,7 +22,7 @@ resource "aws_instance" "app_server" {
   ami           = "ami-0cfde0ea8edd312d4" # Amazon Machine Image - Ubuntu Server 24.04 LTS
   instance_type = "t3.micro"              # Tipo da instância 
 
-  key_name = "Laravel-IaC" # Nome da chave SSH criada no AWS 
+  key_name = "ec2-principal-key" # Nome da chave SSH criada no AWS 
 
   # Tags para organização e identificação dos recursos
   tags = {
